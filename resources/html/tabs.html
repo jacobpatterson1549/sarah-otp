@@ -1,0 +1,37 @@
+<div class=tabs>
+    <div class="tab">
+        <input id="tab-encrypt" type="radio" name="tab-group">
+        <label class="button" for="tab-encrypt">Encrypt</label>
+        <div class="content">
+            {{ template "tab_encrypt.html" . }}
+        </div>
+    </div>
+    <div class="tab">
+        <input id="tab-decrypt" type="radio" name="tab-group">
+        <label class="button" for="tab-decrypt">Decrypt</label>
+        <div class="content">
+            {{ template "tab_decrypt.html" . }}
+        </div>
+    </div>
+    <div class="tab">
+        <input id="tab-key" type="radio" name="tab-group">
+        <label class="button" for="tab-key">Key</label>
+        <div class="content">
+            {{ template "tab_key.html" . }}
+        </div>
+    </div>
+    <div class="tab">
+        <input id="tab-help" type="radio" name="tab-group" checked>
+        <label class="button" for="tab-help">Help</label>
+        <div class="content">
+            {{ template "tab_help.html" . }}
+        </div>
+    </div>
+    <div class="tab">
+        <input id="tab-about" type="radio" name="tab-group">
+        <label class="button" for="tab-about">About</label>
+        <div class="content">
+            {{ template "tab_about.html" . }}
+        </div>
+    </div>
+</div>

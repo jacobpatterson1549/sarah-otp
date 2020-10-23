@@ -1,0 +1,11 @@
+# Ignore everything
+*
+
+# Necessary files
+!cmd
+!resources
+!server
+!ui
+!otp
+!go.mod
+!Makefile

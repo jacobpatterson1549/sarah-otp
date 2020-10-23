@@ -1,0 +1,11 @@
+<form onsubmit="otp.encrypt(event)">
+    <div>
+        <label for="encrypt-message">Message:</label>
+        <textarea id="encrypt-message" required></textarea>
+    </div>
+    <div>
+        <label for="encrypt-key">Key:</label>
+        <input id="encrypt-key" type="file" accept=".pem" required>
+    </div>
+    <input type="submit" id="encrypt-submit" value="Encrypt">
+</form>

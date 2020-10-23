@@ -1,0 +1,15 @@
+# binaries created by make
+/build
+
+# environment variables
+/.env
+
+# Visual Studio Code files
+/.vscode
+__debug_bin
+
+# certificates
+/*.pem
+
+# SonarQube static analysis
+/.scannerwork

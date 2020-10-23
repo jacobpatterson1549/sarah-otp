@@ -1,0 +1,16 @@
+<form onsubmit="otp.decrypt(event)">
+    <div>
+        <label for="decrypt-cipher">Encrypted Message:</label>
+        <input id="decrypt-cipher" type="file" accept=".pem" required>
+    </div>
+    <div>
+        <label for="decrypt-key">Key:</label>
+        <input id="decrypt-key" type="file" accept=".pem" required>
+    </div>
+    <input type="submit" id="decrypt-submit" value="decrypt">
+</form>
+<input type="checkbox" class="has-decrypted-message" hidden>
+<div>
+    <label for="decrypted-message">Decrypted Message:</label>
+    <textarea id="decrypted-message" required></textarea>
+</div>

@@ -1,0 +1,65 @@
+.has-log:not(:checked)+.log,
+.tabs>.tab>input,
+.tabs>.tab>.content,
+.tabs>.tab>.content>.has-decrypted-message:not(:checked)+div {
+    display: none;
+}
+
+.log>.scroll {
+    height: 5em;
+    overflow: auto;
+}
+
+.button,
+label {
+    display: inline-block;
+    margin: .25em;
+}
+
+noscript>img {
+    filter: invert(1);
+}
+noscript,
+.log>.scroll>.error   { color: red; }
+
+.tabs {
+    display: block;
+    position: relative;
+    margin: 2em 0;
+    clear: both;
+    min-height: 200px;
+}
+
+.tab {
+    float: left;
+}
+.tab>input:checked+.button {
+    background: #bbbbbb;
+}
+.button:hover {
+    background: #dddddd;
+}
+.button {
+    margin: 1em .2em;
+    padding: .3em;
+    border: 1px inset;
+    background: #999999;
+}
+.tab>.content {
+    position: absolute;
+    left: 0;
+    background: #ffffff;
+    margin: 1em;
+}
+.tab>input:checked+.button+.content {
+    display: block;
+}
+
+textarea {
+    width: 100%;
+    height: 10em;
+}
+
+form div {
+    margin-bottom: 1em;
+}
