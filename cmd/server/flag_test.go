@@ -62,9 +62,9 @@ func TestNewMainFlags(t *testing.T) {
 func TestNewMainFlagsPortOverride(t *testing.T) {
 	envVars := map[string]string{
 		"VERSION_FILE": "?",
-		"HTTP_PORT":  "1",
-		"HTTPS_PORT": "2",
-		"PORT":       "3",
+		"HTTP_PORT":    "1",
+		"HTTPS_PORT":   "2",
+		"PORT":         "3",
 	}
 	osLookupEnvFunc := func(key string) (string, bool) {
 		v, ok := envVars[key]

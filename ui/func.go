@@ -14,8 +14,8 @@ func InitDomFuncs(ctx context.Context, wg *sync.WaitGroup) {
 		"clear": NewJsFunc(clearLog),
 	}
 	otpFuncs := map[string]js.Func{
-		"encrypt":      NewJsEventFunc(encryptMessage),
-		"decrypt":      NewJsEventFunc(decryptCipher),
+		"encrypt":     NewJsEventFunc(encryptMessage),
+		"decrypt":     NewJsEventFunc(decryptCipher),
 		"generateKey": NewJsEventFunc(generateKey),
 	}
 	RegisterFuncs(ctx, wg, "log", logFuncs)
