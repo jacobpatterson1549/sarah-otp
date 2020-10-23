@@ -1,6 +1,6 @@
 # sarah-otp
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/jacobpatterson1549/sarah-otp)](https://goreportcard.com/report/github.com/jacobpatterson1549/sahah-otp)
+[![Go Report Card](https://goreportcard.com/badge/github.com/jacobpatterson1549/sarah-otp)](https://goreportcard.com/report/github.com/jacobpatterson1549/sarah-otp)
 
 
 ## A One-Time-Pad messaging app
