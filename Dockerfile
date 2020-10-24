@@ -14,5 +14,5 @@ RUN make build \
 # copy files to a minimal build image
 FROM scratch
 WORKDIR /app
-COPY --from=BUILDER /app/build ./
+COPY --from=BUILDER /app/build /app/
 CMD [ "/app/main" ]
