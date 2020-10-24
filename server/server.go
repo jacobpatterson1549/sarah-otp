@@ -123,14 +123,15 @@ func (s Server) runHTTPServer(ctx context.Context, errC chan<- error) {
 }
 
 func (s Server) runHTTPSServer(ctx context.Context, errC chan<- error) {
-	s.Log.Printf("starting https server at at https://127.0.0.1%v", s.httpsServer.Addr)
 	switch {
-	case s.HTTPPort == s.HTTPSPort:
+	case s.httpsOnly():
+		s.Log.Printf("starting http server at at http://127.0.0.1%v", s.httpsServer.Addr)
 		if len(s.TLSCertFile) != 0 || len(s.TLSKeyFile) != 0 {
 			s.Log.Printf("Ignoring TLS_CERT_FILE/TLS_KEY_FILE variables since PORT was specified, using automated certificate management.")
 		}
 		errC <- s.httpsServer.ListenAndServe()
 	default:
+		s.Log.Printf("starting https server at at https://127.0.0.1%v", s.httpsServer.Addr)
 		if _, err := tls.LoadX509KeyPair(s.TLSCertFile, s.TLSKeyFile); err != nil {
 			s.Log.Printf("Problem loading tls certificate: %v", err)
 			errC <- err
