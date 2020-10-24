@@ -1,8 +1,14 @@
-FROM golang:1.14-alpine3.12 AS BUILDER
+FROM golang:1.14-buster AS BUILDER
+
 WORKDIR /app
 
-# download node, bash to run wasm tests, make to build
-RUN apk add nodejs bash make
+# download node, bash to run wasm tests
+RUN apt-get update \
+    && apt-get install \
+        --no-install-recommends \
+        -y \
+            nodejs=10.21.0~dfsg-1~deb10u1 \
+            wamerican-large=2018.04.16-1
 
 # build the application without static libraries and copy resources instead of linking
 COPY . ./
