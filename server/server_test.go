@@ -155,12 +155,10 @@ func TestHandleError(t *testing.T) {
 
 func TestAddMimeType(t *testing.T) {
 	addMimeTypeTests := map[string]string{
-		"favicon.png":   "image/png",
-		"favicon.svg":   "image/svg+xml",
-		"manifest.json": "application/json",
-		"init.js":       "application/javascript",
-		"main.wasm":     "application/wasm",
-		"/":             "", // no mime type
+		"favicon.png": "image/png",
+		"favicon.svg": "image/svg+xml",
+		"main.wasm":   "application/wasm",
+		"/":           "", // no mime type
 	}
 	for fileName, want := range addMimeTypeTests {
 		var s Server
