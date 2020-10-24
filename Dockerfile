@@ -15,6 +15,4 @@ RUN make build \
 FROM scratch
 WORKDIR /app
 COPY --from=BUILDER /app/build ./
-CMD [ "/app/main", \
-    "-tls-cert-file=/app/tls-cert.pem", \
-    "-tls-key-file=/app/tls-key.pem" ]
+CMD [ "/app/main" ]
