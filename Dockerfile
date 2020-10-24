@@ -15,4 +15,4 @@ RUN make build \
 FROM scratch
 WORKDIR /app
 COPY --from=BUILDER /app/build /app/
-CMD [ "/app/main" ]
+ENTRYPOINT [ "/app/main" ]
