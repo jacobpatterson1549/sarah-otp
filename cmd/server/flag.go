@@ -39,7 +39,7 @@ func newMainFlags(osArgs []string, osLookupEnvFunc func(string) (string, bool)) 
 	fs.Parse(programArgs)
 	if portOverride != 0 {
 		m.httpsPort = portOverride
-		m.httpPort = -1
+		m.httpPort = portOverride
 	}
 	return m
 }

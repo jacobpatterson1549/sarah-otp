@@ -73,12 +73,12 @@ func TestNewMainFlagsPortOverride(t *testing.T) {
 	var osArgs []string
 	want := mainFlags{
 		versionFile: "?",
-		httpPort:    -1,
+		httpPort:    3,
 		httpsPort:   3,
 	}
 	got := newMainFlags(osArgs, osLookupEnvFunc)
 	if want != got {
-		t.Errorf("port should override httpsPort and return -1 for http port\nwanted: %v\ngot:    %v", want, got)
+		t.Errorf("port should override httpsPort and httpPort\nwanted: %v\ngot:    %v", want, got)
 	}
 }
 
