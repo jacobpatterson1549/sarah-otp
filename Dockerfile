@@ -8,11 +8,10 @@ RUN apk add nodejs bash make
 COPY . ./
 RUN make build \
     GO_ARGS="CGO_ENABLED=0" \
-    LINK="cp -R" \
-    -j 2
+    LINK="cp -R"
 
 # copy build to a minimal image
 FROM scratch
 WORKDIR /app
-COPY --from=BUILDER /app/build /app/
+COPY --from=BUILDER /app/build ./
 ENTRYPOINT [ "/app/main" ]
