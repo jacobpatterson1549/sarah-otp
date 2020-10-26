@@ -1,7 +1,7 @@
 .PHONY: test-wasm test mkdir-build serve serve-tcp clean
 
 BUILD_DIR := build
-GO_LIST := go list
+GO_LIST := go list ./...
 GO_TEST := go test --cover # -race
 GO_BUILD := go build # -race
 GO_WASM_ARGS := GOOS=js GOARCH=wasm
@@ -13,12 +13,12 @@ OBJS := $(addprefix $(BUILD_DIR)/,main.wasm main version wasm_exec.js resources)
 $(BUILD_DIR): $(OBJS)
 
 test-wasm:
-	$(GO_WASM_ARGS) $(GO_LIST) ./... | grep ui \
+	$(GO_WASM_ARGS) $(GO_LIST) | grep ui \
 		| $(GO_WASM_ARGS) xargs $(GO_TEST) \
 			-exec=$(GO_WASM_PATH)/go_js_wasm_exec
 
 test:
-	$(GO_LIST) ./... | grep -v ui \
+	$(GO_LIST) | grep -v ui \
 		| $(GO_ARGS) xargs $(GO_TEST)
 
 mkdir-build:
@@ -48,12 +48,12 @@ $(BUILD_DIR)/version: | mkdir-build
 		| xargs echo version
 
 $(BUILD_DIR)/main.wasm: test-wasm | mkdir-build
-	$(GO_WASM_ARGS) $(GO_LIST) ./... | grep cmd/ui \
+	$(GO_WASM_ARGS) $(GO_LIST) | grep cmd/ui \
 		| $(GO_WASM_ARGS) xargs $(GO_BUILD) \
 			-o $@
 
 $(BUILD_DIR)/main: test | mkdir-build
-	$(GO_LIST) ./... | grep cmd/server \
+	$(GO_LIST) | grep cmd/server \
 		| $(GO_ARGS) xargs $(GO_BUILD) \
 			-o $@
 

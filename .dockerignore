@@ -2,10 +2,7 @@
 *
 
 # Necessary files
-!cmd
-!resources
-!server
-!ui
-!otp
+!go
 !go.mod
+!resources
 !Makefile

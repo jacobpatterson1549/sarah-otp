@@ -1,6 +1,5 @@
 // +build js,wasm
 
-
 package ui
 
 import (
@@ -11,7 +10,7 @@ import (
 	"syscall/js"
 	"time"
 
-	"github.com/jacobpatterson1549/sarah-otp/otp"
+	"github.com/jacobpatterson1549/sarah-otp/go/otp"
 )
 
 var (

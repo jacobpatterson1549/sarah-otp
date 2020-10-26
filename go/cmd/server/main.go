@@ -11,7 +11,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/jacobpatterson1549/sarah-otp/server"
+	"github.com/jacobpatterson1549/sarah-otp/go/server"
 )
 
 // main creates and runs the server.

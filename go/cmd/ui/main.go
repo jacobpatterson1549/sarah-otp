@@ -8,7 +8,7 @@ import (
 	"sync"
 	"syscall/js"
 
-	"github.com/jacobpatterson1549/sarah-otp/ui"
+	"github.com/jacobpatterson1549/sarah-otp/go/ui"
 )
 
 // main initializes the wasm code for the web dom and runs as long as the browser is open.
