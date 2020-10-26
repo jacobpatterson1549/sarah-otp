@@ -13,7 +13,10 @@ func encode(b []byte) ([]byte, error) {
 		Bytes: b,
 	}
 	err := pem.Encode(&buff, &blk)
-	return buff.Bytes(), err
+	if err != nil {
+		return nil, errors.New("applying pem encoding: " + err.Error())
+	}
+	return buff.Bytes(), nil
 }
 
 func decode(b []byte) ([]byte, error) {
