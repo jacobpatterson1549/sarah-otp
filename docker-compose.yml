@@ -5,8 +5,8 @@ services:
     container_name: "sarah-otp-web"
     env_file: ./.env
     ports:
-      - "${HTTPS_PORT}:8000" # port 8000 on container maps to HTTPS_PORT on docker host
-      - "${HTTP_PORT}:8001"  # port 8001 on container maps to HTTP_PORT on docker host
+      - "${HTTPS_PORT}:8000"
+      - "${HTTP_PORT}:8001"
     environment:
       - HTTPS_PORT=8000
       - HTTP_PORT=8001

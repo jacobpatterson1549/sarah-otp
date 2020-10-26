@@ -1,17 +1,17 @@
 FROM golang:1.14-alpine3.12 AS BUILDER
 WORKDIR /app
 
-# download node, bash to run wasm tests, make to build
+# download build dependencies
 RUN apk add nodejs bash make
 
-# build the application without static libraries and copy resources instead of linking
+# build the app
 COPY . ./
 RUN make build \
     GO_ARGS="CGO_ENABLED=0" \
     LINK="cp -R" \
     -j 2
 
-# copy files to a minimal build image
+# copy build to a minimal image
 FROM scratch
 WORKDIR /app
 COPY --from=BUILDER /app/build /app/
