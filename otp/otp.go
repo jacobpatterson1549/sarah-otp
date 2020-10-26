@@ -1,3 +1,4 @@
+// Package otp encrypts and decrypts messages using One-Time-Pad encription.
 package otp
 
 import (
@@ -5,10 +6,10 @@ import (
 	"errors"
 )
 
-// MaxKeyLength is an arbitrary value chosen to prevent large amounts of processing
+// MaxKeyLength is an arbitrary value chosen to prevent large amounts of processing.
 const MaxKeyLength = 1_000_000
 
-// KeyGenerator is reader that is used to generate keys
+// KeyGenerator is reader that is used to generate keys.
 var KeyGenerator = rand.Reader
 
 // Encrypt encrypts the message using the key to produce the cipher text.

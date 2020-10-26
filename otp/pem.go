@@ -6,6 +6,7 @@ import (
 	"errors"
 )
 
+// encode encodes the byte array with PEM encoding.
 func encode(b []byte) ([]byte, error) {
 	var buff bytes.Buffer
 	blk := pem.Block{
@@ -19,6 +20,7 @@ func encode(b []byte) ([]byte, error) {
 	return buff.Bytes(), nil
 }
 
+// decode decodes the byte array with PEM encoding.
 func decode(b []byte) ([]byte, error) {
 	blk, rest := pem.Decode(b)
 	switch {

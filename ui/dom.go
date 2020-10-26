@@ -1,5 +1,6 @@
 // +build js,wasm
 
+// Package ui contains functions to make the website interactive that can be compiled to WebAssembly for the website.
 package ui
 
 import (

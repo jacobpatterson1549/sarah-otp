@@ -1,3 +1,4 @@
+// Package server contains HTTP servers for the website.
 package server
 
 import (

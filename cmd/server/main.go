@@ -1,3 +1,4 @@
+// Package server runs the website.
 package main
 
 import (
