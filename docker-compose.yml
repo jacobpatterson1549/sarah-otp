@@ -10,8 +10,8 @@ services:
     environment:
       - HTTPS_PORT=8000
       - HTTP_PORT=8001
-      - TLS_CERT_FILE=/app/tls-cert.pem
-      - TLS_KEY_FILE=/app/tls-key.pem
+      - TLS_CERT_FILE=/app/cert.pem
+      - TLS_KEY_FILE=/app/key.pem
     volumes:
-      - ${TLS_CERT_FILE}:/app/tls-cert.pem
-      - ${TLS_KEY_FILE}:/app/tls-key.pem
+      - ${TLS_CERT_FILE}:/app/cert.pem
+      - ${TLS_KEY_FILE}:/app/key.pem
