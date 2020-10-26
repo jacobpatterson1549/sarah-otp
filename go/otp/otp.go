@@ -6,8 +6,8 @@ import (
 	"errors"
 )
 
-// MaxKeyLength is an arbitrary value chosen to prevent large amounts of processing.
-const MaxKeyLength = 1_000_000
+// MaxKeyLength is the maximum size of keys.
+const MaxKeyLength = 50000
 
 // KeyGenerator is reader that is used to generate keys.
 var KeyGenerator = rand.Reader
