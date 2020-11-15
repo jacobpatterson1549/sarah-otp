@@ -20,7 +20,7 @@ noscript>img {
     filter: invert(1);
 }
 noscript,
-.log>.scroll>.error   { color: red; }
+.log>.scroll>.error { color: red; }
 
 .tabs {
     display: block;

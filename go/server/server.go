@@ -24,6 +24,7 @@ type (
 		httpsServer *http.Server
 		httpServer  *http.Server
 		Config
+		templateFiles []string
 	}
 
 	// Config contains fields which describe the server.
@@ -77,11 +78,16 @@ func (cfg Config) NewServer() (*Server, error) {
 		Addr:    fmt.Sprintf(":%d", cfg.HTTPSPort),
 		Handler: httpsServeMux,
 	}
+	templateFiles, err := templateFiles()
+	if err != nil {
+		return nil, fmt.Errorf("loading template file names: %v", err)
+	}
 	s := Server{
-		Data:        data,
-		httpServer:  httpServer,
-		httpsServer: httpsServer,
-		Config:      cfg,
+		Data:          data,
+		httpServer:    httpServer,
+		httpsServer:   httpsServer,
+		Config:        cfg,
+		templateFiles: templateFiles,
 	}
 	httpsServeMux.HandleFunc("/", s.handleHTTPS)
 	httpServeMux.HandleFunc("/", s.redirectToHTTPS) // all requests must be HTTPS
@@ -185,7 +191,7 @@ func (s Server) handleHTTPSGet(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Encoding", "gzip")
 	}
 	switch r.URL.Path {
-	case "/", "/serviceWorker.js", "/manifest.json", "/favicon.svg":
+	case "/", "/serviceWorker.js", "/manifest.json", "/favicon.svg", "/network_check.html":
 		s.serveTemplate(w, r, r.URL.Path)
 	case "/wasm_exec.js", "/main.wasm":
 		http.ServeFile(w, r, "."+r.URL.Path)
@@ -196,32 +202,37 @@ func (s Server) handleHTTPSGet(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// templateFiles gets the list of available resources for templates
+func templateFiles() ([]string, error) {
+	var filenames []string
+	templateFileGlobs := []string{
+		"resources/html/*.html",
+		"resources/*.js",
+		"resources/*.json",
+		"resources/*.css",
+		"resources/*.svg",
+	}
+	for _, g := range templateFileGlobs {
+		matches, err := filepath.Glob(g)
+		if err != nil {
+			return nil, err
+		}
+		filenames = append(filenames, matches...)
+	}
+	return filenames, nil
+}
+
 // sereveTemplate servers the file from the data-driven template.
 func (s Server) serveTemplate(w http.ResponseWriter, r *http.Request, name string) {
-	var (
-		t         *template.Template
-		filenames []string
-	)
+	var t *template.Template
 	switch name {
 	case "/":
 		t = template.New("main.html")
-		templateFileGlobs := []string{
-			"resources/html/*.html",
-			"resources/main.css",
-			"resources/init.js",
-		}
-		for _, g := range templateFileGlobs {
-			matches, err := filepath.Glob(g)
-			if err != nil {
-				s.handleError(w, err)
-			}
-			filenames = append(filenames, matches...)
-		}
+
 	default:
 		t = template.New(name[1:])
-		filenames = append(filenames, "resources"+name)
 	}
-	if _, err := t.ParseFiles(filenames...); err != nil {
+	if _, err := t.ParseFiles(s.templateFiles...); err != nil {
 		err = fmt.Errorf("parsing template %v: %v", name, err)
 		s.handleError(w, err)
 		return

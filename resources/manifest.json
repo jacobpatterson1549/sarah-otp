@@ -5,7 +5,7 @@
     "theme_color": "{{.ThemeColor}}",
     "background_color": "{{.BackgroundColor}}",
     "display": "standalone",
-    "start_url": "/",
+    "start_url": "/network_check.html",
     "icons": [
       {
         "src": "favicon.svg",
