@@ -170,3 +170,69 @@ func TestAddMimeType(t *testing.T) {
 		}
 	}
 }
+
+func TestRedirectToHTTPS(t *testing.T) {
+	redirectToHTTPSTests := []struct {
+		url       string
+		host      string
+		httpPort  int
+		httpsPort int
+		wantURL   string
+		wantError bool
+	}{
+		{
+			url:     "/",
+			host:    "example.com",
+			wantURL: "https://example.com/",
+		},
+		{
+			url:       "/",
+			host:      "example.com:8000:::",
+			wantError: true,
+		},
+		{
+			url:       "/",
+			host:      "example.com:8000",
+			httpPort:  8000,
+			httpsPort: 8001,
+			wantURL:   "https://example.com:8001/",
+		},
+		{
+			url:       "/network_check.html",
+			host:      "example.com:8000",
+			httpPort:  8000,
+			httpsPort: 443,
+			wantURL:   "https://example.com/network_check.html",
+		},
+	}
+	for i, test := range redirectToHTTPSTests {
+		r := httptest.NewRequest("GET", test.url, nil)
+		r.Host = test.host
+		w := httptest.NewRecorder()
+		s := Server{
+			Config: Config{
+				Log:       log.New(ioutil.Discard, "test", log.LstdFlags),
+				HTTPPort:  test.httpPort,
+				HTTPSPort: test.httpsPort,
+			},
+			httpsServer: &http.Server{
+				Addr: fmt.Sprintf(":%d", test.httpsPort),
+			},
+		}
+		s.redirectToHTTPS(w, r)
+		switch {
+		case test.wantError:
+			if w.Code != 500 {
+				t.Errorf("Test %v: wanted error code, got %v", i, w.Code)
+			}
+		default:
+			if w.Code != 307 {
+				t.Errorf("Test %v: wanted redirect code, got %v", i, w.Code)
+			}
+			gotURL := w.Header().Get("Location")
+			if test.wantURL != gotURL {
+				t.Errorf("Test %v: not equal redirect url:\nwanted: %v\ngot:    %v", i, test.wantURL, gotURL)
+			}
+		}
+	}
+}
