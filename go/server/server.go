@@ -217,7 +217,10 @@ func templateFiles() ([]string, error) {
 		if err != nil {
 			return nil, err
 		}
-		filenames = append(filenames, matches...)
+		filenamesTmp := make([]string, len(filenames)+len(matches))
+		copy(filenamesTmp, filenames)
+		copy(filenamesTmp[len(filenames):], matches)
+		filenames = filenamesTmp
 	}
 	return filenames, nil
 }
