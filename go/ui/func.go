@@ -60,7 +60,7 @@ func RegisterFuncs(ctx context.Context, wg *sync.WaitGroup, parentName string, j
 	go ReleaseJsFuncsOnDone(ctx, wg, jsFuncs)
 }
 
-// ReleaseJsFuncsOnDone releases the jsFuncs and decrements the waitgroup when the context is done.
+// ReleaseJsFuncsOnDone releases the jsFuncs and decrements the WaitGroup when the context is done.
 // This function should be called on a separate goroutine.
 func ReleaseJsFuncsOnDone(ctx context.Context, wg *sync.WaitGroup, jsFuncs map[string]js.Func) {
 	defer AlertOnPanic()

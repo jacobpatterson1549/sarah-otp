@@ -1,4 +1,4 @@
-// Package otp encrypts and decrypts messages using One-Time-Pad encription.
+// Package otp encrypts and decrypts messages using One-Time-Pad encryption.
 package otp
 
 import (
@@ -66,7 +66,7 @@ func GenerateKey(length int) ([]byte, error) {
 	return encode(b)
 }
 
-// Xor performs the exclusize-or operation on the two arrays, returning an array the size of the largest array.
+// Xor performs the exclusive-or operation on the two arrays, returning an array the size of the largest array.
 func xor(a, b []byte) []byte {
 	n := len(a)
 	if len(b) > n {

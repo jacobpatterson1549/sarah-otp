@@ -9,14 +9,14 @@ Sarah-OTP allows users to exchange messages confidentially. After users share a 
 
 ### Example
 
-A substition cipher can be used with the OTP, If a message of `CAT` and a cipher of `APPLE` are encrypted together, the encrypted cipher would be `CPCLE`. Assuming only characters can be passed, the message (`CAT`), would be mapped to [2, 0, 19, 0, 0] and the cipher (`APPLE`), would be mapped to [0, 15, 15, 11, 4]. Note that the message is padded with zeroes to make it as long as the key. The the letters are added together and truncated to be between 0 and 25.  For example, `T` + `P` = `19` + `15` = `34`, which has a remainder of `8` when divided by 26, so the letter `I` is used.
+A substitution cipher can be used with the OTP, If a message of `CAT` and a cipher of `APPLE` are encrypted together, the encrypted cipher would be `CPCLE`. Assuming only characters can be passed, the message (`CAT`), would be mapped to [2, 0, 19, 0, 0] and the cipher (`APPLE`), would be mapped to [0, 15, 15, 11, 4]. Note that the message is padded with zeroes to make it as long as the key. The the letters are added together and truncated to be between 0 and 25.  For example, `T` + `P` = `19` + `15` = `34`, which has a remainder of `8` when divided by 26, so the letter `I` is used.
 ```
   2 0  19  0 0 ( C A T A A )
 + 0 15 15 11 4 ( A P P L E )
 --------------
 = 2 15  8 11 4 ( C P I L E )
 ```
-When the cipher is decrypted, the same procedure is used, but with subtraction, to reverse the encryption. Negative values are incremented by 26 to make them correspond to real letters. For examlpe, `I` - `P` = `8` - `15` = `-7`, -`-7` + `26` = `19` = `T`
+When the cipher is decrypted, the same procedure is used, but with subtraction, to reverse the encryption. Negative values are incremented by 26 to make them correspond to real letters. For example, `I` - `P` = `8` - `15` = `-7`, -`-7` + `26` = `19` = `T`
 ```
   2 15  8 11 4 ( C P I L E )
 - 0 15 15 11 4 ( A P P L E )
