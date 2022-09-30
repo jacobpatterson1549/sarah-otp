@@ -26,7 +26,7 @@ func main() {
 	runServer(ctx, *server, log)
 }
 
-// create server greates the server from a configuration.
+// create server creates the server from a configuration.
 func createServer(ctx context.Context, m mainFlags, log *log.Logger) (*server.Server, error) {
 	version, err := version(m.versionFile)
 	if err != nil {

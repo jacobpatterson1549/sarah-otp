@@ -11,7 +11,7 @@ import (
 )
 
 // AlertOnPanic checks to see if a panic has occurred.
-// Thes function shoould be deferred as the first statement for each goroutine
+// This function should be deferred as the first statement for each goroutine
 func AlertOnPanic() {
 	if r := recover(); r != nil {
 		err := recoverError(r)
@@ -26,7 +26,7 @@ func AlertOnPanic() {
 	}
 }
 
-// recoverError converts the recovery interface into a useful error, panicing if the interface is not an error or a string.
+// recoverError converts the recovery interface into a useful error.  Panics if the interface is not an error or a string.
 func recoverError(r interface{}) error {
 	switch v := r.(type) {
 	case error:
@@ -94,7 +94,7 @@ func CloneElement(query string) js.Value {
 	return clone
 }
 
-// FormatTime formats a datetime to HH:MM:SS.
+// FormatTime formats a date/time to HH:MM:SS.
 func FormatTime(utcSeconds int64) string {
 	t := time.Unix(utcSeconds, 0) // uses local timezone
 	return t.Format("15:04:05")

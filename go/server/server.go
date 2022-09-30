@@ -35,7 +35,7 @@ type (
 		Version string
 		// HTTPPort is the TCP port for server http requests.  All traffic is redirected to the https port.
 		HTTPPort int
-		// HTTPSPORT is the TCP port for server https requests.
+		// HTTPSPort is the TCP port for server https requests.
 		HTTPSPort int
 		// The public HTTPS certificate file.
 		TLSCertFile string
@@ -225,7 +225,7 @@ func templateFiles() ([]string, error) {
 	return filenames, nil
 }
 
-// sereveTemplate servers the file from the data-driven template.
+// serveTemplate servers the file from the data-driven template.
 func (s Server) serveTemplate(w http.ResponseWriter, r *http.Request, name string) {
 	var t *template.Template
 	switch name {
@@ -248,7 +248,7 @@ func (s Server) serveTemplate(w http.ResponseWriter, r *http.Request, name strin
 	}
 }
 
-// hasSecHeader returns true if thhe request has any header starting with "Sec-".
+// hasSecHeader returns true if the request has any header starting with "Sec-".
 func (Server) hasSecHeader(r *http.Request) bool {
 	for header := range r.Header {
 		if strings.HasPrefix(header, "Sec-") {
