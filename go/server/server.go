@@ -4,13 +4,11 @@ package server
 import (
 	"compress/gzip"
 	"context"
-	"crypto/tls"
 	"fmt"
 	"html/template"
 	"io"
 	"log"
 	"mime"
-	"net"
 	"net/http"
 	"path/filepath"
 	"strings"
@@ -20,9 +18,8 @@ import (
 type (
 	// Server runs the site.
 	Server struct {
-		Data        any
-		httpsServer *http.Server
-		httpServer  *http.Server
+		Data   any
+		server *http.Server
 		Config
 		templateFiles []string
 	}
@@ -33,14 +30,8 @@ type (
 		Log *log.Logger
 		// Version is used to bust caches of files from older server versions.
 		Version string
-		// HTTPPort is the TCP port for server http requests.  All traffic is redirected to the https port.
-		HTTPPort int
-		// HTTPSPort is the TCP port for server https requests.
-		HTTPSPort int
-		// The public HTTPS certificate file.
-		TLSCertFile string
-		// The private HTTPS key file.
-		TLSKeyFile string
+		// Port is the TCP port for server http requests.
+		Port int
 	}
 
 	// wrappedResponseWriter wraps response writing with another writer.
@@ -55,10 +46,8 @@ func (cfg Config) NewServer() (*Server, error) {
 	switch {
 	case cfg.Log == nil:
 		return nil, fmt.Errorf("missing logger")
-	case cfg.HTTPPort <= 0:
-		return nil, fmt.Errorf("invalid HTTP port: %v", cfg.HTTPPort)
-	case cfg.HTTPSPort <= 0:
-		return nil, fmt.Errorf("invalid HTTPS port: %v", cfg.HTTPSPort)
+	case cfg.Port <= 0:
+		return nil, fmt.Errorf("invalid port: %v", cfg.Port)
 	}
 	data := map[string]string{
 		"Version":         cfg.Version,
@@ -68,15 +57,10 @@ func (cfg Config) NewServer() (*Server, error) {
 		"ThemeColor":      "purple",
 		"BackgroundColor": "white",
 	}
-	httpServeMux := new(http.ServeMux)
-	httpServer := &http.Server{
-		Addr:    fmt.Sprintf(":%d", cfg.HTTPPort),
-		Handler: httpServeMux,
-	}
-	httpsServeMux := new(http.ServeMux)
-	httpsServer := &http.Server{
-		Addr:    fmt.Sprintf(":%d", cfg.HTTPSPort),
-		Handler: httpsServeMux,
+	serveMux := new(http.ServeMux)
+	server := &http.Server{
+		Addr:    fmt.Sprintf(":%d", cfg.Port),
+		Handler: serveMux,
 	}
 	templateFiles, err := templateFiles()
 	if err != nil {
@@ -84,22 +68,19 @@ func (cfg Config) NewServer() (*Server, error) {
 	}
 	s := Server{
 		Data:          data,
-		httpServer:    httpServer,
-		httpsServer:   httpsServer,
+		server:        server,
 		Config:        cfg,
 		templateFiles: templateFiles,
 	}
-	httpsServeMux.HandleFunc("/", s.handleHTTPS)
-	httpServeMux.HandleFunc("/", s.redirectToHTTPS) // all requests must be HTTPS
+	serveMux.HandleFunc("/", s.handle)
 	return &s, nil
 }
 
 // Run the server asynchronously until it receives a shutdown signal.
-// When the HTTP/HTTPS servers stop, errors are logged to the error channel.
+// When the server stops, errors are logged to the error channel.
 func (s Server) Run(ctx context.Context) <-chan error {
 	errC := make(chan error, 2)
-	go s.runHTTPServer(ctx, errC)
-	go s.runHTTPSServer(ctx, errC)
+	go s.runServer(ctx, errC)
 	return errC
 }
 
@@ -109,78 +90,30 @@ func (s Server) Stop(ctx context.Context) error {
 	stopDur := 5 * time.Second
 	ctx, cancelFunc := context.WithTimeout(ctx, stopDur)
 	defer cancelFunc()
-	httpsShutdownErr := s.httpsServer.Shutdown(ctx)
-	httpShutdownErr := s.httpServer.Shutdown(ctx)
-	switch {
-	case httpsShutdownErr != nil:
-		return httpsShutdownErr
-	case httpShutdownErr != nil:
-		return httpShutdownErr
+	if err := s.server.Shutdown(ctx); err != nil {
+		return err
 	}
 	s.Log.Println("server stopped successfully")
 	return nil
 }
 
-// runHTTPSServer runs the http server, adding the return error to the channel when done.
-// The HTTP server is only run if it uses a different port than the HTTPS server.
-func (s Server) runHTTPServer(ctx context.Context, errC chan<- error) {
-	if !s.httpsOnly() {
-		errC <- s.httpServer.ListenAndServe()
-	}
+func (s Server) runServer(ctx context.Context, errC chan<- error) {
+	s.Log.Printf("starting http server at at http://127.0.0.1%v", s.server.Addr)
+	errC <- s.server.ListenAndServe()
 }
 
-func (s Server) runHTTPSServer(ctx context.Context, errC chan<- error) {
+// handle handles HTTP endpoints.
+func (s Server) handle(w http.ResponseWriter, r *http.Request) {
 	switch {
-	case s.httpsOnly():
-		s.Log.Printf("starting http server at at http://127.0.0.1%v", s.httpsServer.Addr)
-		if len(s.TLSCertFile) != 0 || len(s.TLSKeyFile) != 0 {
-			s.Log.Printf("Ignoring TLS_CERT_FILE/TLS_KEY_FILE variables since PORT was specified, using automated certificate management.")
-		}
-		errC <- s.httpsServer.ListenAndServe()
-	default:
-		s.Log.Printf("starting https server at at https://127.0.0.1%v", s.httpsServer.Addr)
-		if _, err := tls.LoadX509KeyPair(s.TLSCertFile, s.TLSKeyFile); err != nil {
-			s.Log.Printf("Problem loading tls certificate: %v", err)
-			errC <- err
-			return
-		}
-		errC <- s.httpsServer.ListenAndServeTLS(s.TLSCertFile, s.TLSKeyFile)
-	}
-}
-
-// handleHTTPS handles HTTPS endpoints.
-func (s Server) handleHTTPS(w http.ResponseWriter, r *http.Request) {
-	switch {
-	case r.TLS == nil && (!s.httpsOnly() || !s.hasSecHeader(r)):
-		s.redirectToHTTPS(w, r)
 	case r.Method == "GET":
-		s.handleHTTPSGet(w, r)
+		s.handleGet(w, r)
 	default:
 		s.httpError(w, http.StatusMethodNotAllowed)
 	}
 }
 
-// redirectToHTTPS redirects the page to HTTPS.
-func (s Server) redirectToHTTPS(w http.ResponseWriter, r *http.Request) {
-	host := r.Host
-	if strings.Contains(host, ":") {
-		var err error
-		host, _, err = net.SplitHostPort(host)
-		if err != nil {
-			err = fmt.Errorf("could not redirect to https: %w", err)
-			s.handleError(w, err)
-			return
-		}
-	}
-	if s.HTTPSPort != 443 && !s.httpsOnly() {
-		host = host + s.httpsServer.Addr
-	}
-	httpsURI := "https://" + host + r.URL.Path
-	http.Redirect(w, r, httpsURI, http.StatusTemporaryRedirect)
-}
-
-// handleHTTPSGet calls handlers for GET endpoints.
-func (s Server) handleHTTPSGet(w http.ResponseWriter, r *http.Request) {
+// handleGet calls handlers for GET endpoints.
+func (s Server) handleGet(w http.ResponseWriter, r *http.Request) {
 	if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
 		w2 := gzip.NewWriter(w)
 		defer w2.Close()
@@ -246,21 +179,6 @@ func (s Server) serveTemplate(w http.ResponseWriter, r *http.Request, name strin
 		s.handleError(w, err)
 		return
 	}
-}
-
-// hasSecHeader returns true if the request has any header starting with "Sec-".
-func (Server) hasSecHeader(r *http.Request) bool {
-	for header := range r.Header {
-		if strings.HasPrefix(header, "Sec-") {
-			return true
-		}
-	}
-	return false
-}
-
-// httpsOnly returns true if the server is only handling HTTPS requests.
-func (s Server) httpsOnly() bool {
-	return s.HTTPPort == s.HTTPSPort
 }
 
 // httpError writes the error status code.

@@ -9,20 +9,13 @@ import (
 
 const (
 	environmentVariableVersionFile = "VERSION_FILE"
-	environmentVariableHTTPPort    = "HTTP_PORT"
-	environmentVariableHTTPSPort   = "HTTPS_PORT"
 	environmentVariablePort        = "PORT"
-	environmentVariableTLSCertFile = "TLS_CERT_FILE"
-	environmentVariableTLSKeyFile  = "TLS_KEY_FILE"
 )
 
 // mainFlags are the configuration options for different environments.
 type mainFlags struct {
 	versionFile string
-	httpPort    int
-	httpsPort   int
-	tlsCertFile string
-	tlsKeyFile  string
+	Port        int
 }
 
 // newMainFlags creates a new, populated mainFlags structure.
@@ -34,18 +27,13 @@ func newMainFlags(osArgs []string, osLookupEnvFunc func(string) (string, bool)) 
 	}
 	programArgs := osArgs[1:]
 	var m mainFlags
-	portOverride := 0
-	fs := m.newFlagSet(osLookupEnvFunc, &portOverride)
+	fs := m.newFlagSet(osLookupEnvFunc)
 	fs.Parse(programArgs)
-	if portOverride != 0 {
-		m.httpsPort = portOverride
-		m.httpPort = portOverride
-	}
 	return m
 }
 
 // newFlagSet creates a flagSet that populates the specified mainFlags.
-func (m *mainFlags) newFlagSet(osLookupEnvFunc func(string) (string, bool), portOverride *int) *flag.FlagSet {
+func (m *mainFlags) newFlagSet(osLookupEnvFunc func(string) (string, bool)) *flag.FlagSet {
 	fs := flag.NewFlagSet("main", flag.ExitOnError)
 	fs.Usage = func() {
 		usage(fs) // [lazy evaluation]
@@ -65,11 +53,7 @@ func (m *mainFlags) newFlagSet(osLookupEnvFunc func(string) (string, bool), port
 		return v2
 	}
 	fs.StringVar(&m.versionFile, "version-file", envValue(environmentVariableVersionFile, "version"), "A file containing the version key (the first word).  Used to bust previously cached files.  Change each time a new version of the server is run.")
-	fs.IntVar(&m.httpPort, "http-port", envValueInt(environmentVariableHTTPPort, 0), "The TCP port for server http requests.  All traffic is redirected to the https port.")
-	fs.IntVar(&m.httpsPort, "https-port", envValueInt(environmentVariableHTTPSPort, 0), "The TCP port for server https requests.")
-	fs.IntVar(portOverride, "port", envValueInt(environmentVariablePort, 0), "The single port to run the server on.  Overrides the -https-port flag.  Causes the server to not handle http requests, ignoring -http-port.")
-	fs.StringVar(&m.tlsCertFile, "tls-cert-file", envValue(environmentVariableTLSCertFile, ""), "The absolute path of the certificate file to use for TLS.")
-	fs.StringVar(&m.tlsKeyFile, "tls-key-file", envValue(environmentVariableTLSKeyFile, ""), "The absolute path of the key file to use for TLS.")
+	fs.IntVar(&m.Port, "port", envValueInt(environmentVariablePort, 0), "The port for server http requests.")
 	return fs
 }
 
@@ -77,10 +61,7 @@ func (m *mainFlags) newFlagSet(osLookupEnvFunc func(string) (string, bool), port
 func usage(fs *flag.FlagSet) {
 	envVars := []string{
 		environmentVariableVersionFile,
-		environmentVariableHTTPPort,
-		environmentVariableHTTPSPort,
-		environmentVariableTLSCertFile,
-		environmentVariableTLSKeyFile,
+		environmentVariablePort,
 	}
 	fmt.Fprintf(fs.Output(), "Runs the server\n")
 	fmt.Fprintf(fs.Output(), "Reads environment variables when possible: [%s]\n", strings.Join(envVars, ","))
