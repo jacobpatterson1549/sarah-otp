@@ -2,8 +2,8 @@
 package main
 
 import (
-	"bufio"
 	"context"
+	"embed"
 	"fmt"
 	"log"
 	"net/http"
@@ -13,6 +13,21 @@ import (
 
 	"github.com/jacobpatterson1549/sarah-otp/go/server"
 )
+
+// resourcesFS is the embedded resources directory.
+//
+//go:embed resources
+var resourcesFS embed.FS
+
+// buildFS is the embedded build directory.
+//
+//go:embed build
+var buildFS embed.FS
+
+// version is the server version
+//
+//go:embed build/version
+var version string
 
 // main creates and runs the server.
 func main() {
@@ -28,14 +43,12 @@ func main() {
 
 // create server creates the server from a configuration.
 func createServer(ctx context.Context, m mainFlags, log *log.Logger) (*server.Server, error) {
-	version, err := version(m.versionFile)
-	if err != nil {
-		return nil, fmt.Errorf("reading versionFile: %v", err)
-	}
 	cfg := server.Config{
-		Log:     log,
-		Version: version,
-		Port:    m.Port,
+		Log:         log,
+		Version:     version,
+		Port:        m.Port,
+		ResourcesFS: resourcesFS,
+		BuildFS:     buildFS,
 	}
 	server, err := cfg.NewServer()
 	if err != nil {
@@ -63,18 +76,4 @@ func runServer(ctx context.Context, server server.Server, log *log.Logger) {
 	if err := server.Stop(ctx); err != nil {
 		log.Printf("stopping server: %v", err)
 	}
-}
-
-// version reads the first word of the versionFile to use as the version.
-func version(versionFileName string) (string, error) {
-	versionFile, err := os.Open(versionFileName)
-	if err != nil {
-		return "", fmt.Errorf("trying to open version file: %v", err)
-	}
-	scanner := bufio.NewScanner(versionFile)
-	scanner.Split(bufio.ScanWords)
-	if !scanner.Scan() {
-		return "", fmt.Errorf("no words in version file")
-	}
-	return scanner.Text(), nil
 }

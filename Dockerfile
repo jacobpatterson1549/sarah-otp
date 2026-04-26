@@ -5,11 +5,9 @@ RUN apk add --no-cache \
         bash=~5.3.3-r1 \
         nodejs=~24.14.1-r0
 COPY . ./
-RUN make all \
-    GO_ARGS="CGO_ENABLED=0" \
-    LINK="cp -R"
+RUN make all GO_ARGS="CGO_ENABLED=0"
 
 FROM scratch
 WORKDIR /app
-COPY --from=BUILDER /app/build ./
+COPY --from=BUILDER /app/build/main ./
 ENTRYPOINT [ "/app/main" ]

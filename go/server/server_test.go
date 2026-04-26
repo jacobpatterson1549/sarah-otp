@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"testing/fstest"
 )
 
 func TestNewServer(t *testing.T) {
@@ -21,6 +22,10 @@ func TestNewServer(t *testing.T) {
 			config: Config{
 				Log:  log,
 				Port: 8001,
+				ResourcesFS: &fstest.MapFS{
+					"resources/html/main.html": {},
+					"resources/main.css":       {},
+				},
 			},
 			wantOk: true,
 		},
@@ -59,9 +64,7 @@ func TestHandleError(t *testing.T) {
 	w := httptest.NewRecorder()
 	err := fmt.Errorf("mock error")
 	s := Server{
-		Config: Config{
-			Log: log.New(&buf, "", log.LstdFlags),
-		},
+		Log: log.New(&buf, "", log.LstdFlags),
 	}
 	want := 500
 	s.handleError(w, err)
@@ -78,7 +81,6 @@ func TestHandleError(t *testing.T) {
 
 func TestAddMimeType(t *testing.T) {
 	addMimeTypeTests := map[string]string{
-		"favicon.png": "image/png",
 		"favicon.svg": "image/svg+xml",
 		"main.wasm":   "application/wasm",
 		"/":           "", // no mime type

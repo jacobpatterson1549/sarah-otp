@@ -1,6 +1,5 @@
 const cacheName = "cache-{{.Version}}";
 const assets = [
-    "./favicon.png",
     "./favicon.svg",
     "./manifest.json",
     "./wasm_exec.js",
