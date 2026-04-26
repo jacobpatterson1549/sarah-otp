@@ -33,12 +33,9 @@ func createServer(ctx context.Context, m mainFlags, log *log.Logger) (*server.Se
 		return nil, fmt.Errorf("reading versionFile: %v", err)
 	}
 	cfg := server.Config{
-		Log:         log,
-		Version:     version,
-		HTTPPort:    m.httpPort,
-		HTTPSPort:   m.httpsPort,
-		TLSCertFile: m.tlsCertFile,
-		TLSKeyFile:  m.tlsKeyFile,
+		Log:     log,
+		Version: version,
+		Port:    m.Port,
 	}
 	server, err := cfg.NewServer()
 	if err != nil {

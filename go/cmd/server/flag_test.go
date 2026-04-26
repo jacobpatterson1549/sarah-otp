@@ -17,33 +17,21 @@ func TestNewMainFlags(t *testing.T) {
 			osArgs: []string{
 				"ignored-binary-name",
 				"-version-file=0",
-				"-http-port=1",
-				"-https-port=2",
-				"-tls-cert-file=3",
-				"-tls-key-file=4",
+				"-port=1",
 			},
 			want: mainFlags{
 				versionFile: "0",
-				httpPort:    1,
-				httpsPort:   2,
-				tlsCertFile: "3",
-				tlsKeyFile:  "4",
+				Port:        1,
 			},
 		},
 		{ // all environment variables
 			envVars: map[string]string{
-				"VERSION_FILE":  "0",
-				"HTTP_PORT":     "1",
-				"HTTPS_PORT":    "2",
-				"TLS_CERT_FILE": "3",
-				"TLS_KEY_FILE":  "4",
+				"VERSION_FILE": "0",
+				"PORT":         "1",
 			},
 			want: mainFlags{
 				versionFile: "0",
-				httpPort:    1,
-				httpsPort:   2,
-				tlsCertFile: "3",
-				tlsKeyFile:  "4",
+				Port:        1,
 			},
 		},
 	}
@@ -59,36 +47,12 @@ func TestNewMainFlags(t *testing.T) {
 	}
 }
 
-func TestNewMainFlagsPortOverride(t *testing.T) {
-	envVars := map[string]string{
-		"VERSION_FILE": "?",
-		"HTTP_PORT":    "1",
-		"HTTPS_PORT":   "2",
-		"PORT":         "3",
-	}
-	osLookupEnvFunc := func(key string) (string, bool) {
-		v, ok := envVars[key]
-		return v, ok
-	}
-	var osArgs []string
-	want := mainFlags{
-		versionFile: "?",
-		httpPort:    3,
-		httpsPort:   3,
-	}
-	got := newMainFlags(osArgs, osLookupEnvFunc)
-	if want != got {
-		t.Errorf("port should override httpsPort and httpPort\nwanted: %v\ngot:    %v", want, got)
-	}
-}
-
 func TestUsage(t *testing.T) {
 	osLookupEnvFunc := func(key string) (string, bool) {
 		return "", false
 	}
 	var m mainFlags
-	var portOverride int
-	fs := m.newFlagSet(osLookupEnvFunc, &portOverride)
+	fs := m.newFlagSet(osLookupEnvFunc)
 	var b bytes.Buffer
 	fs.SetOutput(&b)
 	fs.Init("", flag.ContinueOnError) // override ErrorHandling
@@ -97,13 +61,9 @@ func TestUsage(t *testing.T) {
 		t.Errorf("wanted ErrHelp, got %v", err)
 	}
 	got := b.String()
-	totalCommas := strings.Count(got, ",")
 	b.Reset()
 	fs.PrintDefaults()
-	defaults := b.String()
-	descriptionCommas := strings.Count(defaults, ",")
-	envCommas := totalCommas - descriptionCommas
-	wantEnvVarCount := envCommas + 2       // n+1 vars are joined with n commas, add an extra 1 for the PORT variable
+	wantEnvVarCount := 2
 	wantLineCount := 3 + wantEnvVarCount*2 // 3 initial lines, 2 lines per env var
 	gotLineCount := strings.Count(got, "\n")
 	if wantLineCount != gotLineCount {

@@ -44,36 +44,9 @@ Sarah-OTP uses the [exclusive-or](https://en.wikipedia.org/wiki/Exclusive_or) op
 
 ## Build/Run
 
-### HTTPS
-
-The app requires HTTP TLS (HTTPS) to run. Insecure http requests are redirected to https.
-
-#### localhost
-
-Use [mkcert](https://github.com/FiloSottile/mkcert) to configure a development machine to accept local certificates.
-```bash
-go get github.com/FiloSottile/mkcert
-mkcert -install
-```
-Generate certificates for localhost at 127.0.0.1
-```bash
-mkcert 127.0.0.1
-```
-Then, add the certificate files to the run environment configuration in `.env`.  The certificate files should be in the root of the application, but are aliased to be up a directory since the server runs in the build folder when running locally. 
-```
-TLS_CERT_FILE=../127.0.0.1.pem
-TLS_KEY_FILE=../127.0.0.1-key.pem
-```
-
 ### Server Ports
 
-By default, the server will run on ports 80 and 443 for http and https traffic.  All http traffic is redirected to https.  To override the ports, use the HTTP_PORT and HTTPS_PORT flags.
-
-If the server handles HTTPS by providing its own certificate, use the `PORT` variable to specify the https port.  When PORT is defined, no HTTP server will be started from `HTTP_PORT` and certificates are not read from the `TLS_CERT_FILE` and `TLS_KEY_FILE` flags.
-
-##### Local Default TCP HTTP Ports
-
-Run `make serve-tcp` to run on port 80 for HTTP and port 443 for HTTPS (default TCP ports).  Using these ports requires `sudo` (root) access.
+Use the `PORT` variable to specify the https port.  Specify this in a `env` file.  Example: `PORT=8000`
 
 ### Make
 
@@ -84,6 +57,5 @@ The [Makefile](Makefile) runs the application locally.  This requires Go and a P
 Launching the application with [Docker](https://www.docker.com) requires minimal configuration.
 
 1. Install [docker-compose](https://github.com/docker/compose)
-1. Ensure the files for the `TLS_CERT_FILE` and `TLS_KEY_FILE` environment variables are **NOT** aliased relative to the build folder.  Instead, they should be aliased relative to them by the project folder.  Ideally, refer to them by their absolute paths.
 1. Run `docker-compose up` to launch the application.
 1. Access application by opening <http://localhost:8000>.
