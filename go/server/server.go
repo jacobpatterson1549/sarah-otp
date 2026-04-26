@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"io/fs"
 	"log"
 	"mime"
 	"net/http"
@@ -18,10 +19,11 @@ import (
 type (
 	// Server runs the site.
 	Server struct {
-		Data   any
-		server *http.Server
-		Config
-		templateFiles []string
+		Data    any
+		server  *http.Server
+		tmpl    *template.Template
+		Log     *log.Logger
+		BuildFS fs.FS
 	}
 
 	// Config contains fields which describe the server.
@@ -32,6 +34,10 @@ type (
 		Version string
 		// Port is the TCP port for server http requests.
 		Port int
+		// ResourcesFS contains the files and templates that are served.
+		ResourcesFS fs.FS
+		// BuildFS contains binary/build files to be served.
+		BuildFS fs.FS
 	}
 
 	// wrappedResponseWriter wraps response writing with another writer.
@@ -49,8 +55,9 @@ func (cfg Config) NewServer() (*Server, error) {
 	case cfg.Port <= 0:
 		return nil, fmt.Errorf("invalid port: %v", cfg.Port)
 	}
+	version := strings.TrimSpace(cfg.Version)
 	data := map[string]string{
-		"Version":         cfg.Version,
+		"Version":         version,
 		"Name":            "Sarah-OTP",
 		"ShortName":       "S-OTP",
 		"Description":     "a secure message-passing app",
@@ -62,15 +69,16 @@ func (cfg Config) NewServer() (*Server, error) {
 		Addr:    fmt.Sprintf(":%d", cfg.Port),
 		Handler: serveMux,
 	}
-	templateFiles, err := templateFiles()
+	t, err := template.ParseFS(cfg.ResourcesFS, "resources/html/*.html", "resources/*.*")
 	if err != nil {
-		return nil, fmt.Errorf("loading template file names: %v", err)
+		return nil, fmt.Errorf("parsing template filesystem: %v", err)
 	}
 	s := Server{
-		Data:          data,
-		server:        server,
-		Config:        cfg,
-		templateFiles: templateFiles,
+		Data:    data,
+		server:  server,
+		tmpl:    t,
+		Log:     cfg.Log,
+		BuildFS: cfg.BuildFS,
 	}
 	serveMux.HandleFunc("/", s.handle)
 	return &s, nil
@@ -124,52 +132,28 @@ func (s Server) handleGet(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Encoding", "gzip")
 	}
 	switch r.URL.Path {
-	case "/", "/serviceWorker.js", "/manifest.json", "/favicon.svg", "/network_check.html":
+	case "/", "/serviceWorker.js", "/manifest.json", "/favicon.svg", "/network_check.html", "/robots.txt":
 		s.serveTemplate(w, r, r.URL.Path)
 	case "/wasm_exec.js", "/main.wasm":
-		http.ServeFile(w, r, "."+r.URL.Path)
-	case "/favicon.png", "/robots.txt":
-		http.ServeFile(w, r, "resources"+r.URL.Path)
+		http.ServeFileFS(w, r, s.BuildFS, "build"+r.URL.Path)
+	case "/favicon.ico":
+		// NOOP
 	default:
 		s.httpError(w, http.StatusNotFound)
 	}
 }
 
-// templateFiles gets the list of available resources for templates
-func templateFiles() ([]string, error) {
-	var filenames []string
-	templateFileGlobs := []string{
-		"resources/html/*.html",
-		"resources/*.js",
-		"resources/*.json",
-		"resources/*.css",
-		"resources/*.svg",
-	}
-	for _, g := range templateFileGlobs {
-		matches, err := filepath.Glob(g)
-		if err != nil {
-			return nil, err
-		}
-		filenamesTmp := make([]string, len(filenames)+len(matches))
-		copy(filenamesTmp, filenames)
-		copy(filenamesTmp[len(filenames):], matches)
-		filenames = filenamesTmp
-	}
-	return filenames, nil
-}
-
 // serveTemplate servers the file from the data-driven template.
 func (s Server) serveTemplate(w http.ResponseWriter, r *http.Request, name string) {
-	var t *template.Template
 	switch name {
 	case "/":
-		t = template.New("main.html")
-
+		name = "main.html"
 	default:
-		t = template.New(name[1:])
+		name = name[1:]
 	}
-	if _, err := t.ParseFiles(s.templateFiles...); err != nil {
-		err = fmt.Errorf("parsing template %v: %v", name, err)
+	t := s.tmpl.Lookup(name)
+	if t == nil {
+		err := fmt.Errorf("looking up file %v: not found", name)
 		s.handleError(w, err)
 		return
 	}

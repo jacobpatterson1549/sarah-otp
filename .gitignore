@@ -1,5 +1,7 @@
 # binaries created by make
 /build
+/go/cmd/server/resources
+/go/cmd/server/build
 
 # environment variables
 /.env

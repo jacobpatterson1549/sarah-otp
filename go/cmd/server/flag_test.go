@@ -16,12 +16,10 @@ func TestNewMainFlags(t *testing.T) {
 		{ // all command line
 			osArgs: []string{
 				"ignored-binary-name",
-				"-version-file=0",
 				"-port=1",
 			},
 			want: mainFlags{
-				versionFile: "0",
-				Port:        1,
+				Port: 1,
 			},
 		},
 		{ // all environment variables
@@ -30,8 +28,7 @@ func TestNewMainFlags(t *testing.T) {
 				"PORT":         "1",
 			},
 			want: mainFlags{
-				versionFile: "0",
-				Port:        1,
+				Port: 1,
 			},
 		},
 	}
@@ -63,7 +60,7 @@ func TestUsage(t *testing.T) {
 	got := b.String()
 	b.Reset()
 	fs.PrintDefaults()
-	wantEnvVarCount := 2
+	wantEnvVarCount := 1
 	wantLineCount := 3 + wantEnvVarCount*2 // 3 initial lines, 2 lines per env var
 	gotLineCount := strings.Count(got, "\n")
 	if wantLineCount != gotLineCount {

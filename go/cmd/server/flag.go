@@ -14,8 +14,7 @@ const (
 
 // mainFlags are the configuration options for different environments.
 type mainFlags struct {
-	versionFile string
-	Port        int
+	Port int
 }
 
 // newMainFlags creates a new, populated mainFlags structure.
@@ -52,8 +51,7 @@ func (m *mainFlags) newFlagSet(osLookupEnvFunc func(string) (string, bool)) *fla
 		}
 		return v2
 	}
-	fs.StringVar(&m.versionFile, "version-file", envValue(environmentVariableVersionFile, "version"), "A file containing the version key (the first word).  Used to bust previously cached files.  Change each time a new version of the server is run.")
-	fs.IntVar(&m.Port, "port", envValueInt(environmentVariablePort, 0), "The port for server http requests.")
+	fs.IntVar(&m.Port, "port", envValueInt(environmentVariablePort, 8080), "The port for server http requests.")
 	return fs
 }
 
