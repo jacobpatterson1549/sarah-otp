@@ -68,10 +68,7 @@ func GenerateKey(length int) ([]byte, error) {
 
 // Xor performs the exclusive-or operation on the two arrays, returning an array the size of the largest array.
 func xor(a, b []byte) []byte {
-	n := len(a)
-	if len(b) > n {
-		n = len(b)
-	}
+	n := max(len(b), len(a))
 	c := make([]byte, n)
 	for i := 0; i < len(a) && i < len(b); i++ {
 		c[i] = a[i] ^ b[i]

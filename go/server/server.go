@@ -20,7 +20,7 @@ import (
 type (
 	// Server runs the site.
 	Server struct {
-		Data        interface{}
+		Data        any
 		httpsServer *http.Server
 		httpServer  *http.Server
 		Config
