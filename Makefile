@@ -6,7 +6,7 @@ GO_TEST := go test --cover # -race
 GO_BUILD := go build # -race
 GO_WASM_ARGS := GOOS=js GOARCH=wasm
 GO_ARGS :=
-GO_WASM_PATH := $(shell go env GOROOT)/misc/wasm
+GO_WASM_PATH := $(shell go env GOROOT)/lib/wasm
 LINK := ln -fs
 OBJS := $(addprefix $(BUILD_DIR)/,main.wasm main version wasm_exec.js resources)
 

@@ -1,3 +1,3 @@
 module github.com/jacobpatterson1549/sarah-otp
 
-go 1.14
+go 1.26

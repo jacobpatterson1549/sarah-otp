@@ -1,6 +1,9 @@
-FROM golang:1.14-alpine3.12 AS BUILDER
-RUN apk add nodejs bash make
+FROM golang:1.26-alpine3.23 AS BUILDER
 WORKDIR /app
+RUN apk add --no-cache \
+        make=~4.4.1-r3 \
+        bash=~5.3.3-r1 \
+        nodejs=~24.14.1-r0
 COPY . ./
 RUN make all \
     GO_ARGS="CGO_ENABLED=0" \
